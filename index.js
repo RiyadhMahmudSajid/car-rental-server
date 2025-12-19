@@ -33,6 +33,7 @@ async function run() {
         const userCollection = db.collection("user")
         const adminCollection = db.collection("admin")
         const bookingCollection = db.collection("booking")
+        const reviewCollection = db.collection("review")
 
         app.get('/all-car', async (req, res) => {
             const findResult = (await carCollection.find().toArray());
@@ -45,6 +46,27 @@ async function run() {
             const result = await carCollection.insertOne(carData)
             res.send('data post')
         })
+        //review post
+
+        app.post('/reviews', async (req, res) => {
+            const reviewData = req.body
+            const result = await reviewCollection.insertOne(reviewData)
+            res.send(result)
+        })
+
+        app.get('/review', async (req, res) => {
+            try {
+                const result = await reviewCollection
+                    .find({})           
+                    .sort({ date: -1 })
+                    .limit(6)           
+                    .toArray();    
+
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error fetching reviews" });
+            }
+        });
         app.get('/all-cars/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
@@ -63,8 +85,8 @@ async function run() {
         app.get('/users', async (req, res) => {
             try {
                 const users = await userCollection.find().toArray()
-                console.log( users);
-                res.status(200).send( users)
+                console.log(users);
+                res.status(200).send(users)
             } catch (err) {
                 res.status(500).json({
                     message: err
