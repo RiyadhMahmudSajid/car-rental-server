@@ -34,6 +34,7 @@ async function run() {
         const adminCollection = db.collection("admin")
         const bookingCollection = db.collection("booking")
         const reviewCollection = db.collection("review")
+        const qualityCollection = db.collection("quality")
 
         app.get('/all-car', async (req, res) => {
             const findResult = (await carCollection.find().toArray());
@@ -57,16 +58,63 @@ async function run() {
         app.get('/review', async (req, res) => {
             try {
                 const result = await reviewCollection
-                    .find({})           
+                    .find({})
                     .sort({ date: -1 })
-                    .limit(6)           
-                    .toArray();    
+                    .limit(6)
+                    .toArray();
 
                 res.send(result);
             } catch (error) {
                 res.status(500).send({ message: "Error fetching reviews" });
             }
         });
+
+        app.get('/my-reviews', async (req, res) => {
+            try {
+               
+                const result = await reviewCollection.find().toArray()
+                res.status(200).send(result)
+
+            } catch (err) {
+                res.status(500).send(err)
+            }
+
+        })
+
+
+        app.get('/my-reviews', async (req, res) => {
+            try {
+                const email = req.query.email
+                const filter = { userEmail: email }
+                const result = await reviewCollection.find(filter).toArray()
+                res.status(200).send(result)
+
+            } catch (err) {
+                res.status(500).send(err)
+            }
+
+        })
+
+        ///  poast quality
+        app.post('/qualityData', async (req, res) => {
+            try {
+                const qualityData = req.body
+                const result = await qualityCollection.insertOne(qualityData)
+                res.status(200).send(result)
+            } catch (error) {
+                res.status(500).send(error.message)
+            }
+        })
+
+        app.get('/quality', async (req, res) => {
+            try {
+                const result = await qualityCollection.find().toArray()
+                res.status(200).send(result)
+            } catch (err) {
+                res.status(500).send(error.message)
+            }
+        })
+
         app.get('/all-cars/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
@@ -125,11 +173,11 @@ async function run() {
                 email: userEmail,
                 paymentStatus: 'pending'
             });
-            if (activeBookingsCount >= 1) {
-                return res.status(400).send({
-                    message: 'You can rent maximum 1 cars at a time'
-                });
-            }
+            // if (activeBookingsCount >= 1) {
+            //     return res.status(400).send({
+            //         message: 'You can rent maximum 1 cars at a time'
+            //     });
+            // }
 
             const result = await bookingCollection.insertOne(bookingData);
             res.send(result)
