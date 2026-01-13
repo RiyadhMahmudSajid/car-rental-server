@@ -35,6 +35,7 @@ async function run() {
         const bookingCollection = db.collection("booking")
         const reviewCollection = db.collection("review")
         const qualityCollection = db.collection("quality")
+        const messageCollection = db.collection("message")
 
         app.get('/all-car', async (req, res) => {
             const findResult = (await carCollection.find().toArray());
@@ -71,7 +72,7 @@ async function run() {
 
         app.get('/my-reviews', async (req, res) => {
             try {
-               
+
                 const result = await reviewCollection.find().toArray()
                 res.status(200).send(result)
 
@@ -173,7 +174,7 @@ async function run() {
                 email: userEmail,
                 paymentStatus: 'pending'
             });
-            // if (activeBookingsCount >= 1) {
+            // if (activeBookingsCount >= 3) {
             //     return res.status(400).send({
             //         message: 'You can rent maximum 1 cars at a time'
             //     });
@@ -260,6 +261,22 @@ async function run() {
                 })
             }
         })
+
+        // message send into contact
+
+        app.post('/message', async (req, res) => {
+            try {
+                const message = req.body
+                const result = await messageCollection.insertOne(message)
+                
+                res.status(200).send(result)
+
+
+            } catch (err) {
+                res.status(500)
+            }
+        })
+
 
 
         await client.db("admin").command({ ping: 1 });
